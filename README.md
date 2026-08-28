@@ -1,6 +1,6 @@
 # Enterprise Express
 
-## Play here: https://markascern.github.io/enterprise.html
+## [Play here](https://markascern.github.io/enterprise.html)
 
 Hi! I'm 12 years old and I made this train driving game all about the **Enterprise** — the real express train that Translink and Irish Rail run between **Belfast Grand Central** and **Dublin Connolly**.
 
@@ -27,6 +27,7 @@ In the game you get to drive a huge 300 km/h express across the whole route. You
 | `X` | Switch which side of the train you look at |
 | Right mouse drag | Look around the train |
 | Scroll | Zoom in and out |
+| Red **STOP** button | Brakes the train to a stand and holds it there until you press it again |
 
 ## Stop like a real driver
 

@@ -56,19 +56,7 @@
       pointer-events: none;
     }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      min-height: 96px;
-      padding: 18px 28px 15px;
-      background: linear-gradient(180deg, rgba(7, 29, 43, 0.97), rgba(7, 29, 43, 0.86));
-      border-bottom: 3px solid var(--orange);
-    }
-
-    .eyebrow,
-    .route,
     .label,
-    .stat-label,
     .controls,
     .telemetry-label,
     .speed-limit,
@@ -79,62 +67,9 @@
       letter-spacing: 0.14em;
     }
 
-    .brand h1 {
-      margin: 2px 0 4px;
-      font-size: clamp(22px, 3vw, 31px);
-      line-height: 1;
-      letter-spacing: 0.08em;
-    }
-
-    .route {
-      color: #d3dfe0;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-    }
-
-    .top-stats {
-      display: flex;
-      align-items: center;
-      gap: clamp(22px, 4vw, 50px);
-      padding-right: 3px;
-    }
-
-    .stat {
-      min-width: 92px;
-      text-align: right;
-    }
-
-    .stat-label {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      display: block;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-    }
-
-    .progress-track {
-      width: 160px;
-      height: 7px;
-      margin-top: 8px;
-      overflow: hidden;
-      border-radius: 4px;
-      background: #234454;
-    }
-
-    #progress-fill {
-      width: 0%;
-      height: 100%;
-      background: var(--green);
-      transition: width 100ms linear;
-    }
-
     .telemetry {
       position: absolute;
-      top: 120px;
+      top: 16px;
       left: 28px;
       padding: 12px 15px;
       border-left: 3px solid var(--orange);
@@ -228,9 +163,38 @@
       text-align: right;
     }
 
+    .stop-button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 9px 10px;
+      color: var(--cream);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      background: #b32020;
+      border: 1px solid rgba(247, 240, 223, 0.4);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .stop-button:hover {
+      background: #d12828;
+    }
+
+    .stop-button.engaged {
+      color: #7a1414;
+      background: var(--cream);
+      border-color: var(--cream);
+    }
+
+    .stop-button.engaged:hover {
+      background: #ffffff;
+    }
+
     .speed-box {
       position: absolute;
-      top: 120px;
+      top: 16px;
       right: 28px;
       min-width: 135px;
       padding: 12px 15px;
@@ -256,7 +220,7 @@
 
     .route-map {
       position: absolute;
-      top: 218px;
+      top: 112px;
       right: 28px;
       width: 188px;
       padding: 11px 12px 10px;
@@ -361,6 +325,20 @@
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.08em;
+    }
+
+    .score-chip {
+      align-self: flex-end;
+      margin: 0 clamp(24px, 5vw, 70px);
+      text-align: right;
+    }
+
+    .score-value {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
     }
 
     .controls {
@@ -477,30 +455,9 @@
     }
 
     @media (max-width: 720px) {
-      .topbar {
-        padding: 14px 16px;
-      }
-
-      .route {
-        max-width: 260px;
-        line-height: 1.4;
-      }
-
-      .top-stats {
-        gap: 13px;
-      }
-
-      .top-stats .stat:first-child {
-        display: none;
-      }
-
-      .progress-track {
-        width: 100px;
-      }
-
       .telemetry,
       .speed-box {
-        top: 112px;
+        top: 14px;
       }
 
       .telemetry {
@@ -537,7 +494,7 @@
       }
 
       .route-map {
-        top: 214px;
+        top: 106px;
         right: 16px;
         width: 150px;
       }
@@ -556,25 +513,6 @@
   <div id="scene"></div>
 
   <div id="hud">
-    <header class="topbar">
-      <div class="brand">
-        <div class="eyebrow">TRANSLINK / IARNRÃ“D Ã‰IREANN / SERVICE E1</div>
-        <h1>ENTERPRISE EXPRESS</h1>
-        <div class="route">BELFAST GRAND CENTRAL / PORTADOWN / NEWRY / DUNDALK / DROGHEDA / DUBLIN CONNOLLY</div>
-      </div>
-      <div class="top-stats">
-        <div class="stat">
-          <span class="stat-label">SCORE</span>
-          <span id="score" class="stat-value">0000</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">ROUTE</span>
-          <span id="progress" class="stat-value">00%</span>
-          <div class="progress-track"><div id="progress-fill"></div></div>
-        </div>
-      </div>
-    </header>
-
     <div class="telemetry">
       <div class="telemetry-label">NEXT STOP</div>
       <div id="telemetry-main" class="telemetry-main">PORTADOWN</div>
@@ -584,13 +522,13 @@
         <button class="view-button active" data-view="front" type="button">FRONT</button>
         <button class="view-button" data-view="side" type="button">SIDE</button>
         <button class="view-button" data-view="rear" type="button">REAR</button>
-        <button class="view-button" data-view="top" type="button">TOP</button>
       </div>
       <div class="power-caption">POWER / HOLD SPEED</div>
       <div class="power-row">
         <input id="power-slider" class="power-slider" type="range" min="0" max="100" step="5" value="0" aria-label="Power setting">
         <span id="power-value" class="power-value">0%</span>
       </div>
+      <button id="stop-button" class="stop-button" type="button">STOP</button>
     </div>
 
     <div id="speed-box" class="speed-box">
@@ -626,6 +564,10 @@
         <div class="label">DRIVER'S BOARD</div>
         <div id="next-name" class="next-name">NEXT STOP PORTADOWN</div>
         <div id="next-detail" class="next-detail">028.0 KM / COUNTY ARMAGH</div>
+      </div>
+      <div class="score-chip">
+        <span class="label">SCORE</span>
+        <span id="score" class="score-value">0000</span>
       </div>
       <div class="controls">UP / W ACCELERATE &nbsp;&nbsp; DOWN / S BRAKE &nbsp;&nbsp; SPACE EMERGENCY BRAKE<br>SCROLL ZOOM &nbsp;&nbsp; H HORN &nbsp;&nbsp; P PAUSE &nbsp;&nbsp; X SIDE &nbsp;&nbsp; R RESTART</div>
     </footer>
@@ -722,6 +664,8 @@
         cameraMode: "front",
         cameraSide: 1,
         zoom: 1,
+        stopHeld: false,
+        introHold: true,
         message: "Welcome aboard.",
       };
 
@@ -742,6 +686,7 @@
       const overlayResult = document.getElementById("overlay-result");
       const action = document.getElementById("action");
       const sideButton = document.getElementById("side-button");
+      const stopButton = document.getElementById("stop-button");
       const mapTrain = document.getElementById("map-train");
       const territory = document.getElementById("territory");
       const borderStatus = document.getElementById("border-status");
@@ -2695,9 +2640,13 @@ function coachEndFittings(unit, endZ) {
         state.cameraMode = "front";
         state.cameraSide = 1;
         state.zoom = 1;
+        state.stopHeld = false;
+        state.introHold = true;
         state.throttleSetting = 0;
         powerSlider.value = "0";
         powerValue.textContent = "0%";
+        stopButton.classList.remove("engaged");
+        stopButton.textContent = "STOP";
         setCameraMode("front");
         state.message = "Service ready. Set power or hold W to build speed toward 300 km/h.";
         keys.clear();
@@ -2771,12 +2720,12 @@ function coachEndFittings(unit, endZ) {
           return;
         }
 
-        const throttleTarget = held("ArrowUp", "w") ? 100 : state.throttleSetting;
+        const throttleTarget = state.stopHeld ? 0 : (held("ArrowUp", "w") ? 100 : state.throttleSetting);
         const throttleRate = throttleTarget > state.throttle ? 45 : 75;
         state.throttle += THREE.MathUtils.clamp(throttleTarget - state.throttle, -throttleRate * dt, throttleRate * dt);
 
-        const brakeRate = held(" ") ? 12 : 5;
-        if (held("ArrowDown", "s", " ")) state.brake = Math.min(1, state.brake + brakeRate * dt);
+        const brakeRate = state.stopHeld || held(" ") ? 12 : 5;
+        if (state.stopHeld || held("ArrowDown", "s", " ")) state.brake = Math.min(1, state.brake + brakeRate * dt);
         else state.brake = Math.max(0, state.brake - 2.8 * dt);
 
         let acceleration = (state.throttle / 100) * 18;
@@ -2840,7 +2789,18 @@ function coachEndFittings(unit, endZ) {
         let desired;
         let target;
 
-        if (state.cameraMode === "side") {
+        if (state.introHold && (state.speed > 1 || state.cameraMode !== "front" || orbit.dragging || zoom !== 1)) {
+          state.introHold = false;
+        }
+
+        if (state.introHold) {
+          desired = point.clone()
+            .add(frame.tangent.clone().multiplyScalar(46))
+            .add(frame.normal.clone().multiplyScalar(27 * state.cameraSide));
+          desired.y = 4.4;
+          target = point.clone();
+          target.y = 2.4;
+        } else if (state.cameraMode === "side") {
           const offset = frame.normal.clone()
             .multiplyScalar(52 * zoom * state.cameraSide)
             .applyAxisAngle(yAxis, orbit.yaw);
@@ -2857,19 +2817,10 @@ function coachEndFittings(unit, endZ) {
           desired.y = 9 * Math.max(0.7, zoom) + orbit.pitch * 12;
           target = rearPoint.clone().add(frame.tangent.clone().multiplyScalar(12));
           target.y = 2.8;
-        } else if (state.cameraMode === "top") {
-          const offset = frame.normal.clone()
-            .multiplyScalar(8 * state.cameraSide)
-            .add(frame.tangent.clone().multiplyScalar(-10 * zoom))
-            .applyAxisAngle(yAxis, orbit.yaw);
-          desired = centerPoint.clone().add(offset);
-          desired.y = 82 * zoom;
-          target = centerPoint.clone();
-          target.y = 0;
         } else {
           const offset = frame.tangent.clone()
             .multiplyScalar(-33 * zoom)
-            .add(frame.normal.clone().multiplyScalar(11 * state.cameraSide))
+            .add(frame.normal.clone().multiplyScalar(16 * state.cameraSide))
             .applyAxisAngle(yAxis, orbit.yaw);
           desired = point.clone().add(offset);
           desired.y += 8 * Math.max(0.6, zoom) + orbit.pitch * 10;
@@ -2889,11 +2840,8 @@ function coachEndFittings(unit, endZ) {
 
       function updateHud() {
         const station = nextStation();
-        const progress = Math.min(1, state.position / ROUTE_END_KM);
         const mapPosition = getMapPosition(state.position);
         document.getElementById("score").textContent = String(state.score).padStart(4, "0");
-        document.getElementById("progress").textContent = `${Math.floor(progress * 100).toString().padStart(2, "0")}%`;
-        document.getElementById("progress-fill").style.width = `${progress * 100}%`;
         document.getElementById("speed").textContent = `${Math.round(state.speed).toString().padStart(3, "0")} km/h`;
         document.getElementById("speed-limit").textContent = `LIMIT ${speedLimit()}`;
         document.getElementById("speed-box").classList.toggle("warning", state.overspeed);
@@ -2930,7 +2878,7 @@ function coachEndFittings(unit, endZ) {
         overlay.classList.remove("hidden");
         overlayTitle.textContent = "ENTERPRISE EXPRESS";
         overlayKicker.textContent = "A 300 KM/H IRISH EXPRESS RUN";
-        overlayCopy.textContent = "Take the Class 9001 Enterprise set south from Belfast Grand Central. Set the power slider to hold speed - up to 300 km/h on the open line - pick a camera from the view buttons, zoom with the scroll wheel, watch for the 150 and 70 boards, then brake early and stop below 14 km/h inside each platform zone. Your departure announcement will play when you start.";
+        overlayCopy.textContent = "Take the Class 9001 Enterprise set south from Belfast Grand Central. Set the power slider to hold speed - up to 300 km/h on the open line - pick a camera from the view buttons, zoom with the scroll wheel, and use the red STOP button to brake to a stand and hold. Watch for the 150 and 70 boards, then brake early and stop below 14 km/h inside each platform zone. Your departure announcement will play when you start.";
         overlayResult.textContent = "";
         action.textContent = "PRESS ENTER OR CLICK TO DRIVE";
       }
@@ -3046,6 +2994,22 @@ function coachEndFittings(unit, endZ) {
       sideButton.addEventListener("click", (event) => {
         event.stopPropagation();
         if (state.started && !state.finished) toggleSide();
+      });
+
+      stopButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (!state.started || state.finished) return;
+        state.stopHeld = !state.stopHeld;
+        stopButton.classList.toggle("engaged", state.stopHeld);
+        stopButton.textContent = state.stopHeld ? "RELEASE BRAKE" : "STOP";
+        if (state.stopHeld) {
+          state.throttleSetting = 0;
+          powerSlider.value = "0";
+          powerValue.textContent = "0%";
+          state.message = "Stop toggle engaged. Braking to a stand and holding.";
+        } else {
+          state.message = "Stop toggle released. Power is available again.";
+        }
       });
 
       document.querySelectorAll(".view-button").forEach((button) => {
