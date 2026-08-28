@@ -2637,8 +2637,6 @@ function coachEndFittings(unit, endZ) {
         rollingFilter: null,
         windGain: null,
         brakeGain: null,
-        clackBuffer: null,
-        clackTimer: 0,
       };
 
       function initAudio() {
@@ -2818,88 +2816,47 @@ function coachEndFittings(unit, endZ) {
         trainAudio.squealGain = squealGain;
         trainAudio.squealOsc = squealOsc;
 
-        // Rail joint buffers: steel clack + heavy thud
-        const clackBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
-        const clackData = clackBuffer.getChannelData(0);
-        for (let index = 0; index < clackData.length; index += 1) {
-          clackData[index] = (Math.random() * 2 - 1) * Math.pow(1 - index / clackData.length, 2.2);
-        }
-        trainAudio.clackBuffer = clackBuffer;
-
-        const thudBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.14), ctx.sampleRate);
-        const thudData = thudBuffer.getChannelData(0);
-        let thudLast = 0;
-        for (let index = 0; index < thudData.length; index += 1) {
-          thudLast = (thudLast + 0.04 * (Math.random() * 2 - 1)) / 1.04;
-          thudData[index] = thudLast * Math.pow(1 - index / thudData.length, 1.6);
-        }
-        trainAudio.thudBuffer = thudBuffer;
-
-        // Real engine loop - drop an engine.mp3 next to this file and it takes over
+        // Real recorded loops - drop idle.mp3 / engine.mp3 / breaking.mp3 beside the game
         trainAudio.engineSrc = null;
-        fetch("engine.mp3")
-          .then((response) => {
-            if (!response.ok) throw new Error("engine.mp3 not found");
-            return response.arrayBuffer();
-          })
-          .then((data) => ctx.decodeAudioData(data))
-          .then((buffer) => {
-            if (trainAudio.ctx !== ctx) return;
-            const src = ctx.createBufferSource();
-            src.buffer = buffer;
-            src.loop = true;
-            const filter = ctx.createBiquadFilter();
-            filter.type = "lowpass";
-            filter.frequency.value = 950;
-            const engineGain = ctx.createGain();
-            engineGain.gain.value = 0;
-            src.connect(filter);
-            filter.connect(engineGain);
-            engineGain.connect(master);
-            src.start();
-            trainAudio.engineSrc = src;
-            trainAudio.engineGainNode = engineGain;
-          })
-          .catch(() => {});
-      }
-
-      function playClack() {
-        const ctx = trainAudio.ctx;
-        if (!ctx || !trainAudio.clackBuffer) return;
-        const now = ctx.currentTime;
-        const worldSpeed = Math.max(6, state.speed / 6);
-        const gap = THREE.MathUtils.clamp(10 / worldSpeed, 0.3, 0.7);
-        const loud = 0.15 + Math.min(0.28, state.speed / 700);
-        for (const pairOffset of [0, gap]) {
-          for (const offset of [0, 0.12]) {
-            const at = now + pairOffset + offset;
-            const level = loud * (offset ? 0.78 : 1) * (0.85 + Math.random() * 0.3);
-            const src = ctx.createBufferSource();
-            src.buffer = trainAudio.clackBuffer;
-            const filter = ctx.createBiquadFilter();
-            filter.type = "bandpass";
-            filter.frequency.value = 1250 + Math.random() * 500;
-            filter.Q.value = 1.1;
-            const gain = ctx.createGain();
-            gain.gain.value = level;
-            src.connect(filter);
-            filter.connect(gain);
-            gain.connect(trainAudio.master);
-            src.start(at);
-
-            const thud = ctx.createBufferSource();
-            thud.buffer = trainAudio.thudBuffer;
-            const thudFilter = ctx.createBiquadFilter();
-            thudFilter.type = "lowpass";
-            thudFilter.frequency.value = 300;
-            const thudGain = ctx.createGain();
-            thudGain.gain.value = level * 1.25;
-            thud.connect(thudFilter);
-            thudFilter.connect(thudGain);
-            thudGain.connect(trainAudio.master);
-            thud.start(at);
-          }
-        }
+        trainAudio.idleSrc = null;
+        trainAudio.breakingSrc = null;
+        const loadLoop = (name, lowpassHz, onReady) => {
+          fetch(name)
+            .then((response) => {
+              if (!response.ok) throw new Error(name + " not found");
+              return response.arrayBuffer();
+            })
+            .then((data) => ctx.decodeAudioData(data))
+            .then((buffer) => {
+              if (trainAudio.ctx !== ctx) return;
+              const src = ctx.createBufferSource();
+              src.buffer = buffer;
+              src.loop = true;
+              const filter = ctx.createBiquadFilter();
+              filter.type = "lowpass";
+              filter.frequency.value = lowpassHz;
+              const gain = ctx.createGain();
+              gain.gain.value = 0;
+              src.connect(filter);
+              filter.connect(gain);
+              gain.connect(master);
+              src.start();
+              onReady(src, gain);
+            })
+            .catch(() => {});
+        };
+        loadLoop("engine.mp3", 950, (src, gain) => {
+          trainAudio.engineSrc = src;
+          trainAudio.engineGainNode = gain;
+        });
+        loadLoop("idle.mp3", 950, (src, gain) => {
+          trainAudio.idleSrc = src;
+          trainAudio.idleGainNode = gain;
+        });
+        loadLoop("breaking.mp3", 1400, (src, gain) => {
+          trainAudio.breakingSrc = src;
+          trainAudio.breakingGainNode = gain;
+        });
       }
 
       function playBrakeRelease() {
@@ -3008,25 +2965,48 @@ function coachEndFittings(unit, endZ) {
         trainAudio.windGain.gain.setTargetAtTime(windTarget, t, 0.25);
         trainAudio.windHiGain.gain.setTargetAtTime(Math.pow(speedRatio, 2.5) * 0.05, t, 0.25);
 
-        // Diesel sound: real engine.mp3 loop if present, otherwise the synth chug
+        // Diesel sound from real recordings: idle.mp3 at standstill / light power,
+        // engine.mp3 takes over as power rises, idle.mp3 pitches up as acceleration if engine.mp3 is missing
         const engineOn = state.started && !state.paused;
+        const throttleRatio = state.throttle / 100;
         if (trainAudio.engineSrc) {
-          trainAudio.engineSrc.playbackRate.setTargetAtTime(0.8 + (state.throttle / 100) * 0.65 + speedRatio * 0.15, t, 0.15);
-          trainAudio.engineGainNode.gain.setTargetAtTime(engineOn ? 0.12 + (state.throttle / 100) * 0.16 : 0, t, 0.15);
+          trainAudio.engineSrc.playbackRate.setTargetAtTime(0.8 + throttleRatio * 0.65 + speedRatio * 0.15, t, 0.15);
+          trainAudio.engineGainNode.gain.setTargetAtTime(engineOn ? 0.1 + throttleRatio * 0.24 : 0, t, 0.15);
+        }
+        if (trainAudio.idleSrc) {
+          const idleRate = trainAudio.engineSrc ? 1 : 0.8 + throttleRatio * 0.9 + speedRatio * 0.25;
+          trainAudio.idleSrc.playbackRate.setTargetAtTime(idleRate, t, 0.2);
+          const idleTarget = !engineOn
+            ? 0
+            : trainAudio.engineSrc
+              ? 0.02 + (1 - throttleRatio) * 0.2
+              : 0.13 + throttleRatio * 0.2;
+          trainAudio.idleGainNode.gain.setTargetAtTime(idleTarget, t, 0.18);
+        }
+        if (trainAudio.engineSrc || trainAudio.idleSrc) {
           trainAudio.motorGain.gain.setTargetAtTime(0, t, 0.2);
         } else {
-          const motorFreq = 9 + (state.throttle / 100) * 15 + speedRatio * 4;
+          const motorFreq = 9 + throttleRatio * 15 + speedRatio * 4;
           trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.25);
           trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 1.5, t, 0.25);
-          const motorTarget = engineOn ? 0.028 + (state.throttle / 100) * 0.055 + speedRatio * 0.015 : 0;
+          const motorTarget = engineOn ? 0.028 + throttleRatio * 0.055 + speedRatio * 0.015 : 0;
           trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.12);
         }
 
-        const screechTarget = state.brake > 0.25 && state.speed > 25
-          ? Math.min(0.22, (state.brake - 0.25) * 0.5 * Math.min(1, state.speed / 130))
-          : 0;
-        trainAudio.brakeGain.gain.setTargetAtTime(screechTarget, t, 0.12);
-        trainAudio.screech2Gain.gain.setTargetAtTime(screechTarget * 0.5, t, 0.12);
+        if (trainAudio.breakingSrc) {
+          const breakingTarget = state.brake > 0.08 && moving && state.speed > 8
+            ? Math.min(0.3, state.brake * 0.42 * Math.min(1, state.speed / 100))
+            : 0;
+          trainAudio.breakingGainNode.gain.setTargetAtTime(breakingTarget, t, 0.2);
+          trainAudio.brakeGain.gain.setTargetAtTime(0, t, 0.1);
+          trainAudio.screech2Gain.gain.setTargetAtTime(0, t, 0.1);
+        } else {
+          const screechTarget = state.brake > 0.25 && state.speed > 25
+            ? Math.min(0.22, (state.brake - 0.25) * 0.5 * Math.min(1, state.speed / 130))
+            : 0;
+          trainAudio.brakeGain.gain.setTargetAtTime(screechTarget, t, 0.12);
+          trainAudio.screech2Gain.gain.setTargetAtTime(screechTarget * 0.5, t, 0.12);
+        }
 
         const curvature = curveAmount();
         const squealTarget = moving && state.speed > 40
@@ -3037,16 +3017,6 @@ function coachEndFittings(unit, endZ) {
 
         if (trainAudio.prevBrake > 0.45 && state.brake < 0.15 && moving) playBrakeRelease();
         trainAudio.prevBrake = state.brake;
-
-        if (moving) {
-          const worldSpeed = state.speed / 6;
-          trainAudio.clackTimer -= dt;
-          if (trainAudio.clackTimer <= 0) {
-            playClack();
-            const gap = THREE.MathUtils.clamp(10 / worldSpeed, 0.3, 0.7);
-            trainAudio.clackTimer = gap * 2 + 0.2 + Math.random() * 0.08;
-          }
-        }
       }
 
       function reset(started = false) {

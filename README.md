@@ -50,7 +50,7 @@ Brake early and glide into the platform under **14 km/h** to score points. That'
 - Spinning wheels, signals, bridges, rivers, and lakes
 - A map of the Island of Ireland with the border crossing
 - A departure announcement that plays when you start
-- Realistic train sounds: deep bogie rumble, clickety-clack rail joints, traction motor whine, flange squeal on curves, air brake hiss, and a proper two-tone horn
+- Real train sounds: a recorded engine idle that revs up as you pull the power, a real brake sound when you slow down, flange squeal on curves, air brake hiss, and a proper two-tone horn you can hold
 - An alert that tells you exactly when to brake for every station
 
 If you download the game files, keep `announcement.mp3` next to `enterprise.html` so the departure announcement can play.
