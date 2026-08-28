@@ -25,9 +25,13 @@ In the game you get to drive a huge 300 km/h express across the whole route. You
 | `V` | Switch between front and cab camera |
 | `F` | See the whole train, front to back |
 | `X` | Switch which side of the train you look at |
-| Right mouse drag | Look around the train |
-| Scroll | Zoom in and out |
-| Red **STOP** button | Brakes the train to a stand and holds it there until you press it again |
+| Drag with mouse or finger | Look around the train (works on iPad!) |
+| Scroll or pinch | Zoom in and out |
+| On-screen **POWER** / **BRAKE** levers | Pull them like real cab controls |
+| Red **STOP** button | Emergency stop - brakes hard and holds until you press it again |
+| Yellow **HORN** button | Toot the horn! |
+
+Watch for the big alert in the middle of the screen — when it flashes **BRAKE NOW**, start braking and you'll stop right at the platform!
 
 ## Stop like a real driver
 
@@ -46,5 +50,7 @@ Brake early and glide into the platform under **14 km/h** to score points. That'
 - Spinning wheels, signals, bridges, rivers, and lakes
 - A map of the Island of Ireland with the border crossing
 - A departure announcement that plays when you start
+- Realistic train sounds: deep bogie rumble, clickety-clack rail joints, traction motor whine, flange squeal on curves, air brake hiss, and a proper two-tone horn
+- An alert that tells you exactly when to brake for every station
 
 If you download the game files, keep `announcement.mp3` next to `enterprise.html` so the departure announcement can play.

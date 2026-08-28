@@ -44,6 +44,7 @@
     #scene canvas {
       display: block;
       cursor: grab;
+      touch-action: none;
     }
 
     #scene canvas.dragging {
@@ -131,7 +132,7 @@
       background: var(--green);
     }
 
-    .power-caption {
+    .levers-caption {
       margin-top: 11px;
       color: var(--muted);
       font-size: 8px;
@@ -139,57 +140,195 @@
       letter-spacing: 0.12em;
     }
 
-    .power-row {
+    .levers {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 5px;
-      max-width: 290px;
+      align-items: flex-end;
+      gap: 10px;
+      margin-top: 6px;
       pointer-events: auto;
     }
 
-    .power-slider {
-      flex: 1;
-      height: 4px;
-      accent-color: var(--orange);
+    .lever-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 56px;
+    }
+
+    .lever-slot {
+      position: relative;
+      width: 34px;
+      height: 86px;
+      border-radius: 6px;
+      background:
+        repeating-linear-gradient(180deg, rgba(247, 240, 223, 0.16) 0 1px, transparent 1px 12px),
+        #0d2a3d;
+      border: 1px solid rgba(247, 240, 223, 0.25);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .lever {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 86px;
+      height: 34px;
+      margin: 0;
+      transform: translate(-50%, -50%) rotate(-90deg);
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
       cursor: pointer;
     }
 
-    .power-value {
-      min-width: 34px;
+    .lever::-webkit-slider-runnable-track {
+      height: 34px;
+      background: transparent;
+    }
+
+    .lever::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #071d2b;
+      background: linear-gradient(180deg, #f7f0df, #b9c3c0);
+      box-shadow: 0 2px 5px rgba(7, 29, 43, 0.55);
+    }
+
+    .lever::-moz-range-track {
+      height: 34px;
+      background: transparent;
+    }
+
+    .lever::-moz-range-thumb {
+      width: 28px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #071d2b;
+      background: linear-gradient(180deg, #f7f0df, #b9c3c0);
+    }
+
+    .lever.power-lever::-webkit-slider-thumb {
+      background: linear-gradient(180deg, #35c98f, #16805c);
+    }
+
+    .lever.power-lever::-moz-range-thumb {
+      background: linear-gradient(180deg, #35c98f, #16805c);
+    }
+
+    .lever.brake-lever::-webkit-slider-thumb {
+      background: linear-gradient(180deg, #f29d49, #c4571d);
+    }
+
+    .lever.brake-lever::-moz-range-thumb {
+      background: linear-gradient(180deg, #f29d49, #c4571d);
+    }
+
+    .lever-tag {
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    .lever-readout {
       color: var(--cream);
       font-size: 11px;
       font-weight: 800;
-      text-align: right;
     }
 
-    .stop-button {
-      width: 100%;
-      margin-top: 12px;
-      padding: 9px 10px;
+    .cab-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      pointer-events: auto;
+    }
+
+    .emergency {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
       color: var(--cream);
       font: inherit;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 900;
-      letter-spacing: 0.16em;
-      background: #b32020;
-      border: 1px solid rgba(247, 240, 223, 0.4);
+      letter-spacing: 0.1em;
+      background: radial-gradient(circle at 35% 30%, #e04848, #8f1616 72%);
+      border: 3px solid #d9dcda;
+      box-shadow: 0 0 0 3px #123246, 0 4px 10px rgba(7, 29, 43, 0.5);
       cursor: pointer;
       pointer-events: auto;
     }
 
-    .stop-button:hover {
-      background: #d12828;
+    .emergency:hover {
+      filter: brightness(1.12);
     }
 
-    .stop-button.engaged {
-      color: #7a1414;
-      background: var(--cream);
-      border-color: var(--cream);
+    .emergency.engaged {
+      background: radial-gradient(circle at 35% 30%, #ff6b5e, #c21f1f 72%);
+      animation: emergency-pulse 1s infinite;
     }
 
-    .stop-button.engaged:hover {
-      background: #ffffff;
+    @keyframes emergency-pulse {
+      0%, 100% { box-shadow: 0 0 0 3px #123246, 0 0 14px 4px rgba(226, 62, 46, 0.75); }
+      50% { box-shadow: 0 0 0 3px #123246, 0 0 24px 9px rgba(226, 62, 46, 0.95); }
+    }
+
+    .horn-button {
+      padding: 9px 11px;
+      color: #071d2b;
+      font: inherit;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      background: var(--yellow);
+      border: 1px solid rgba(7, 29, 43, 0.35);
+      border-radius: 4px;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .horn-button:hover {
+      background: #ffd97a;
+    }
+
+    .cab-alert {
+      position: absolute;
+      top: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 22px;
+      color: var(--cream);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-align: center;
+      background: rgba(143, 22, 22, 0.92);
+      border: 2px solid rgba(247, 240, 223, 0.55);
+      box-shadow: 0 8px 26px rgba(7, 29, 43, 0.45);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .cab-alert.hidden {
+      display: none;
+    }
+
+    .cab-alert.good {
+      background: rgba(22, 128, 92, 0.92);
+    }
+
+    .cab-alert.urgent {
+      animation: alert-flash 0.55s infinite;
+    }
+
+    @keyframes alert-flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
     }
 
     .speed-box {
@@ -479,8 +618,9 @@
       }
 
       .view-buttons,
-      .power-row {
+      .levers {
         max-width: 250px;
+        flex-wrap: wrap;
       }
 
       .view-mode {
@@ -523,13 +663,26 @@
         <button class="view-button" data-view="side" type="button">SIDE</button>
         <button class="view-button" data-view="rear" type="button">REAR</button>
       </div>
-      <div class="power-caption">POWER / HOLD SPEED</div>
-      <div class="power-row">
-        <input id="power-slider" class="power-slider" type="range" min="0" max="100" step="5" value="0" aria-label="Power setting">
-        <span id="power-value" class="power-value">0%</span>
+      <div class="levers-caption">DRIVER'S LEVERS</div>
+      <div class="levers">
+        <div class="lever-group">
+          <div class="lever-slot"><input id="power-lever" class="lever power-lever" type="range" min="0" max="100" step="5" value="0" aria-label="Power lever"></div>
+          <span id="power-value" class="lever-readout">0%</span>
+          <div class="lever-tag">POWER</div>
+        </div>
+        <div class="lever-group">
+          <div class="lever-slot"><input id="brake-lever" class="lever brake-lever" type="range" min="0" max="100" step="5" value="0" aria-label="Brake lever"></div>
+          <span id="brake-value" class="lever-readout">0%</span>
+          <div class="lever-tag">BRAKE</div>
+        </div>
       </div>
-      <button id="stop-button" class="stop-button" type="button">STOP</button>
+      <div class="cab-actions">
+        <button id="emergency-button" class="emergency" type="button">STOP</button>
+        <button id="horn-button" class="horn-button" type="button">HORN</button>
+      </div>
     </div>
+
+    <div id="cab-alert" class="cab-alert hidden">BRAKE NOW</div>
 
     <div id="speed-box" class="speed-box">
       <div id="speed" class="speed-value">000 km/h</div>
@@ -556,7 +709,7 @@
       <div class="map-status"><span id="territory">NORTHERN IRELAND</span><span id="border-status">BORDER AHEAD</span></div>
     </div>
 
-    <div class="view-mode">VIEW <span id="view">FRONT</span> / SCROLL TO ZOOM<br>HOLD RMB + DRAG TO LOOK</div>
+    <div class="view-mode">VIEW <span id="view">FRONT</span> / SCROLL OR PINCH TO ZOOM<br>DRAG TO LOOK AROUND</div>
     <button id="side-button" class="side-button" type="button">SWITCH SIDE / <span id="side">LEFT</span></button>
 
     <footer class="bottom-bar">
@@ -665,6 +818,7 @@
         cameraSide: 1,
         zoom: 1,
         stopHeld: false,
+        brakeLever: 0,
         introHold: true,
         message: "Welcome aboard.",
       };
@@ -686,7 +840,9 @@
       const overlayResult = document.getElementById("overlay-result");
       const action = document.getElementById("action");
       const sideButton = document.getElementById("side-button");
-      const stopButton = document.getElementById("stop-button");
+      const stopButton = document.getElementById("emergency-button");
+      const hornButton = document.getElementById("horn-button");
+      const cabAlert = document.getElementById("cab-alert");
       const mapTrain = document.getElementById("map-train");
       const territory = document.getElementById("territory");
       const borderStatus = document.getElementById("border-status");
@@ -2494,19 +2650,58 @@ function coachEndFittings(unit, endZ) {
         if (!AudioCtx) return;
         const ctx = new AudioCtx();
         trainAudio.ctx = ctx;
+        trainAudio.prevBrake = 0;
+
         const master = ctx.createGain();
-        master.gain.value = 0.55;
-        master.connect(ctx.destination);
+        master.gain.value = 0.5;
+        const limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -14;
+        limiter.knee.value = 12;
+        limiter.ratio.value = 8;
+        limiter.attack.value = 0.004;
+        limiter.release.value = 0.18;
+        master.connect(limiter);
+        limiter.connect(ctx.destination);
         trainAudio.master = master;
 
-        const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-        const noiseData = noiseBuffer.getChannelData(0);
-        for (let index = 0; index < noiseData.length; index += 1) {
-          noiseData[index] = Math.random() * 2 - 1;
-        }
+        const makeNoise = (seconds, brown) => {
+          const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let last = 0;
+          for (let index = 0; index < data.length; index += 1) {
+            const white = Math.random() * 2 - 1;
+            if (brown) {
+              last = (last + 0.02 * white) / 1.02;
+              data[index] = last * 3.5;
+            } else {
+              data[index] = white;
+            }
+          }
+          return buffer;
+        };
+        const whiteBuffer = makeNoise(2, false);
+        const brownBuffer = makeNoise(3, true);
+        trainAudio.whiteBuffer = whiteBuffer;
 
+        // Deep bogie rumble - the low body of a heavy train
+        const rumble = ctx.createBufferSource();
+        rumble.buffer = brownBuffer;
+        rumble.loop = true;
+        const rumbleFilter = ctx.createBiquadFilter();
+        rumbleFilter.type = "lowpass";
+        rumbleFilter.frequency.value = 110;
+        const rumbleGain = ctx.createGain();
+        rumbleGain.gain.value = 0;
+        rumble.connect(rumbleFilter);
+        rumbleFilter.connect(rumbleGain);
+        rumbleGain.connect(master);
+        rumble.start();
+        trainAudio.rumbleGain = rumbleGain;
+        trainAudio.rumbleFilter = rumbleFilter;
+
+        // Steel-on-steel rolling band
         const rolling = ctx.createBufferSource();
-        rolling.buffer = noiseBuffer;
+        rolling.buffer = whiteBuffer;
         rolling.loop = true;
         const rollingFilter = ctx.createBiquadFilter();
         rollingFilter.type = "lowpass";
@@ -2520,13 +2715,14 @@ function coachEndFittings(unit, endZ) {
         trainAudio.rollingGain = rollingGain;
         trainAudio.rollingFilter = rollingFilter;
 
+        // Wind rush - two bands so it thickens with speed
         const wind = ctx.createBufferSource();
-        wind.buffer = noiseBuffer;
+        wind.buffer = whiteBuffer;
         wind.loop = true;
         const windFilter = ctx.createBiquadFilter();
         windFilter.type = "bandpass";
-        windFilter.frequency.value = 850;
-        windFilter.Q.value = 0.6;
+        windFilter.frequency.value = 700;
+        windFilter.Q.value = 0.5;
         const windGain = ctx.createGain();
         windGain.gain.value = 0;
         wind.connect(windFilter);
@@ -2535,12 +2731,50 @@ function coachEndFittings(unit, endZ) {
         wind.start();
         trainAudio.windGain = windGain;
 
+        const windHi = ctx.createBufferSource();
+        windHi.buffer = whiteBuffer;
+        windHi.loop = true;
+        const windHiFilter = ctx.createBiquadFilter();
+        windHiFilter.type = "bandpass";
+        windHiFilter.frequency.value = 2300;
+        windHiFilter.Q.value = 0.7;
+        const windHiGain = ctx.createGain();
+        windHiGain.gain.value = 0;
+        windHi.connect(windHiFilter);
+        windHiFilter.connect(windHiGain);
+        windHiGain.connect(master);
+        windHi.start();
+        trainAudio.windHiGain = windHiGain;
+
+        // Traction motor whine - pitch climbs with speed
+        const motorOsc = ctx.createOscillator();
+        motorOsc.type = "sawtooth";
+        motorOsc.frequency.value = 40;
+        const motorOsc2 = ctx.createOscillator();
+        motorOsc2.type = "sine";
+        motorOsc2.frequency.value = 81;
+        const motorFilter = ctx.createBiquadFilter();
+        motorFilter.type = "lowpass";
+        motorFilter.frequency.value = 850;
+        const motorGain = ctx.createGain();
+        motorGain.gain.value = 0;
+        motorOsc.connect(motorFilter);
+        motorOsc2.connect(motorFilter);
+        motorFilter.connect(motorGain);
+        motorGain.connect(master);
+        motorOsc.start();
+        motorOsc2.start();
+        trainAudio.motorGain = motorGain;
+        trainAudio.motorOsc = motorOsc;
+        trainAudio.motorOsc2 = motorOsc2;
+
+        // Brake screech - two narrow bands wailing together
         const screech = ctx.createBufferSource();
-        screech.buffer = noiseBuffer;
+        screech.buffer = whiteBuffer;
         screech.loop = true;
         const screechFilter = ctx.createBiquadFilter();
         screechFilter.type = "bandpass";
-        screechFilter.frequency.value = 3400;
+        screechFilter.frequency.value = 3300;
         screechFilter.Q.value = 14;
         const brakeGain = ctx.createGain();
         brakeGain.gain.value = 0;
@@ -2548,34 +2782,112 @@ function coachEndFittings(unit, endZ) {
         screechFilter.connect(brakeGain);
         brakeGain.connect(master);
         screech.start();
-        trainAudio.brakeGain = brakeGain;
 
+        const screech2 = ctx.createBufferSource();
+        screech2.buffer = whiteBuffer;
+        screech2.loop = true;
+        const screech2Filter = ctx.createBiquadFilter();
+        screech2Filter.type = "bandpass";
+        screech2Filter.frequency.value = 5100;
+        screech2Filter.Q.value = 10;
+        const screech2Gain = ctx.createGain();
+        screech2Gain.gain.value = 0;
+        screech2.connect(screech2Filter);
+        screech2Filter.connect(screech2Gain);
+        screech2Gain.connect(brakeGain);
+        screech2.start();
+        trainAudio.brakeGain = brakeGain;
+        trainAudio.screech2Gain = screech2Gain;
+
+        // Flange squeal on curves - warbly high tone
+        const squealOsc = ctx.createOscillator();
+        squealOsc.type = "triangle";
+        squealOsc.frequency.value = 4100;
+        const squealVibrato = ctx.createOscillator();
+        squealVibrato.frequency.value = 6.5;
+        const squealVibratoGain = ctx.createGain();
+        squealVibratoGain.gain.value = 55;
+        squealVibrato.connect(squealVibratoGain);
+        squealVibratoGain.connect(squealOsc.frequency);
+        const squealGain = ctx.createGain();
+        squealGain.gain.value = 0;
+        squealOsc.connect(squealGain);
+        squealGain.connect(master);
+        squealOsc.start();
+        squealVibrato.start();
+        trainAudio.squealGain = squealGain;
+        trainAudio.squealOsc = squealOsc;
+
+        // Rail joint buffers: steel clack + heavy thud
         const clackBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
         const clackData = clackBuffer.getChannelData(0);
         for (let index = 0; index < clackData.length; index += 1) {
           clackData[index] = (Math.random() * 2 - 1) * Math.pow(1 - index / clackData.length, 2.2);
         }
         trainAudio.clackBuffer = clackBuffer;
+
+        const thudBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.14), ctx.sampleRate);
+        const thudData = thudBuffer.getChannelData(0);
+        let thudLast = 0;
+        for (let index = 0; index < thudData.length; index += 1) {
+          thudLast = (thudLast + 0.04 * (Math.random() * 2 - 1)) / 1.04;
+          thudData[index] = thudLast * Math.pow(1 - index / thudData.length, 1.6);
+        }
+        trainAudio.thudBuffer = thudBuffer;
       }
 
       function playClack() {
         const ctx = trainAudio.ctx;
         if (!ctx || !trainAudio.clackBuffer) return;
         const now = ctx.currentTime;
-        for (const offset of [0, 0.11]) {
+        const loud = 0.07 + Math.min(0.3, state.speed / 800);
+        for (const offset of [0, 0.1 + Math.random() * 0.02]) {
           const src = ctx.createBufferSource();
           src.buffer = trainAudio.clackBuffer;
           const filter = ctx.createBiquadFilter();
           filter.type = "bandpass";
-          filter.frequency.value = 900 + Math.random() * 700;
-          filter.Q.value = 1.4;
+          filter.frequency.value = 750 + Math.random() * 900;
+          filter.Q.value = 1.2;
           const gain = ctx.createGain();
-          gain.gain.value = 0.1 + Math.min(0.3, state.speed / 900);
+          gain.gain.value = loud * (0.7 + Math.random() * 0.5);
           src.connect(filter);
           filter.connect(gain);
           gain.connect(trainAudio.master);
           src.start(now + offset);
+
+          const thud = ctx.createBufferSource();
+          thud.buffer = trainAudio.thudBuffer;
+          const thudFilter = ctx.createBiquadFilter();
+          thudFilter.type = "lowpass";
+          thudFilter.frequency.value = 210;
+          const thudGain = ctx.createGain();
+          thudGain.gain.value = loud * 1.1;
+          thud.connect(thudFilter);
+          thudFilter.connect(thudGain);
+          thudGain.connect(trainAudio.master);
+          thud.start(now + offset);
         }
+      }
+
+      function playBrakeRelease() {
+        const ctx = trainAudio.ctx;
+        if (!ctx || !trainAudio.whiteBuffer) return;
+        const now = ctx.currentTime;
+        const src = ctx.createBufferSource();
+        src.buffer = trainAudio.whiteBuffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = 4400;
+        filter.Q.value = 0.8;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(trainAudio.master);
+        src.start(now);
+        src.stop(now + 1.2);
       }
 
       function playHorn() {
@@ -2583,40 +2895,97 @@ function coachEndFittings(unit, endZ) {
         if (!ctx) return;
         const now = ctx.currentTime;
         for (const freq of [311, 370]) {
-          const osc = ctx.createOscillator();
-          osc.type = "sawtooth";
-          osc.frequency.value = freq;
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.16, now + 0.05);
-          gain.gain.setValueAtTime(0.16, now + 0.55);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-          osc.connect(gain);
-          gain.connect(trainAudio.master);
-          osc.start(now);
-          osc.stop(now + 0.95);
+          const parts = [
+            ["sawtooth", 1, 1],
+            ["square", 2.01, 0.3],
+            ["sine", 3.02, 0.2],
+          ];
+          for (const [type, mult, level] of parts) {
+            const osc = ctx.createOscillator();
+            osc.type = type;
+            osc.frequency.value = freq * mult;
+            osc.detune.value = Math.random() * 6 - 3;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.12 * level, now + 0.06);
+            gain.gain.setValueAtTime(0.12 * level, now + 0.75);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.15);
+            osc.connect(gain);
+            gain.connect(trainAudio.master);
+            osc.start(now);
+            osc.stop(now + 1.2);
+          }
+          const breath = ctx.createBufferSource();
+          breath.buffer = trainAudio.whiteBuffer;
+          const breathFilter = ctx.createBiquadFilter();
+          breathFilter.type = "bandpass";
+          breathFilter.frequency.value = freq * 2;
+          breathFilter.Q.value = 1.6;
+          const breathGain = ctx.createGain();
+          breathGain.gain.setValueAtTime(0, now);
+          breathGain.gain.linearRampToValueAtTime(0.05, now + 0.06);
+          breathGain.gain.setValueAtTime(0.05, now + 0.75);
+          breathGain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+          breath.connect(breathFilter);
+          breathFilter.connect(breathGain);
+          breathGain.connect(trainAudio.master);
+          breath.start(now);
+          breath.stop(now + 1.15);
         }
+      }
+
+      function curveAmount() {
+        const a = routeFrame(state.position).tangent;
+        const b = routeFrame(state.position + 0.25).tangent;
+        return Math.abs(Math.atan2(a.x, a.z) - Math.atan2(b.x, b.z));
       }
 
       function updateAudio(dt) {
         if (!trainAudio.ctx) return;
+        const t = trainAudio.ctx.currentTime;
         const speedRatio = state.speed / VMAX;
-        const rollingTarget = state.speed > 0.5 ? 0.05 + speedRatio * 0.2 : 0;
-        trainAudio.rollingGain.gain.setTargetAtTime(rollingTarget, trainAudio.ctx.currentTime, 0.15);
-        trainAudio.rollingFilter.frequency.setTargetAtTime(260 + speedRatio * 500, trainAudio.ctx.currentTime, 0.2);
-        const windTarget = speedRatio * speedRatio * 0.34;
-        trainAudio.windGain.gain.setTargetAtTime(windTarget, trainAudio.ctx.currentTime, 0.25);
-        const screechTarget = state.brake > 0.25 && state.speed > 25
-          ? Math.min(0.24, (state.brake - 0.25) * 0.55 * Math.min(1, state.speed / 130))
-          : 0;
-        trainAudio.brakeGain.gain.setTargetAtTime(screechTarget, trainAudio.ctx.currentTime, 0.12);
+        const moving = state.started && !state.paused && state.speed > 0.5;
 
-        if (state.started && !state.paused && state.speed > 3) {
+        const rumbleTarget = moving ? 0.1 + speedRatio * 0.42 : 0;
+        trainAudio.rumbleGain.gain.setTargetAtTime(rumbleTarget, t, 0.15);
+        trainAudio.rumbleFilter.frequency.setTargetAtTime(70 + speedRatio * 170, t, 0.25);
+
+        const rollingTarget = moving ? 0.05 + speedRatio * 0.18 : 0;
+        trainAudio.rollingGain.gain.setTargetAtTime(rollingTarget, t, 0.15);
+        trainAudio.rollingFilter.frequency.setTargetAtTime(260 + speedRatio * 520, t, 0.2);
+
+        const windTarget = speedRatio * speedRatio * 0.3;
+        trainAudio.windGain.gain.setTargetAtTime(windTarget, t, 0.25);
+        trainAudio.windHiGain.gain.setTargetAtTime(Math.pow(speedRatio, 2.5) * 0.2, t, 0.25);
+
+        const motorFreq = 38 + speedRatio * 130 + (state.throttle / 100) * 22;
+        trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.08);
+        trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 2.02, t, 0.08);
+        const motorTarget = moving ? Math.min(0.15, (state.throttle / 100) * 0.09 + speedRatio * 0.09) : 0;
+        trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.1);
+
+        const screechTarget = state.brake > 0.25 && state.speed > 25
+          ? Math.min(0.22, (state.brake - 0.25) * 0.5 * Math.min(1, state.speed / 130))
+          : 0;
+        trainAudio.brakeGain.gain.setTargetAtTime(screechTarget, t, 0.12);
+        trainAudio.screech2Gain.gain.setTargetAtTime(screechTarget * 0.5, t, 0.12);
+
+        const curvature = curveAmount();
+        const squealTarget = moving && state.speed > 40
+          ? Math.min(0.05, Math.max(0, curvature - 0.04) * 0.9) * Math.min(1, state.speed / 150)
+          : 0;
+        trainAudio.squealGain.gain.setTargetAtTime(squealTarget, t, 0.18);
+        trainAudio.squealOsc.frequency.setTargetAtTime(3900 + curvature * 900, t, 0.4);
+
+        if (trainAudio.prevBrake > 0.45 && state.brake < 0.15 && moving) playBrakeRelease();
+        trainAudio.prevBrake = state.brake;
+
+        if (moving) {
           const worldSpeed = state.speed / 6;
           trainAudio.clackTimer -= dt;
           if (trainAudio.clackTimer <= 0) {
             playClack();
-            trainAudio.clackTimer = THREE.MathUtils.clamp(26 / worldSpeed, 0.16, 2.6);
+            trainAudio.clackTimer = THREE.MathUtils.clamp(26 / worldSpeed * (0.92 + Math.random() * 0.16), 0.14, 2.6);
           }
         }
       }
@@ -2641,10 +3010,13 @@ function coachEndFittings(unit, endZ) {
         state.cameraSide = 1;
         state.zoom = 1;
         state.stopHeld = false;
+        state.brakeLever = 0;
         state.introHold = true;
         state.throttleSetting = 0;
         powerSlider.value = "0";
         powerValue.textContent = "0%";
+        brakeLever.value = "0";
+        brakeValue.textContent = "0%";
         stopButton.classList.remove("engaged");
         stopButton.textContent = "STOP";
         setCameraMode("front");
@@ -2724,9 +3096,9 @@ function coachEndFittings(unit, endZ) {
         const throttleRate = throttleTarget > state.throttle ? 45 : 75;
         state.throttle += THREE.MathUtils.clamp(throttleTarget - state.throttle, -throttleRate * dt, throttleRate * dt);
 
+        const brakeInput = state.stopHeld ? 1 : Math.max(held("ArrowDown", "s", " ") ? 1 : 0, state.brakeLever / 100);
         const brakeRate = state.stopHeld || held(" ") ? 12 : 5;
-        if (state.stopHeld || held("ArrowDown", "s", " ")) state.brake = Math.min(1, state.brake + brakeRate * dt);
-        else state.brake = Math.max(0, state.brake - 2.8 * dt);
+        state.brake += THREE.MathUtils.clamp(brakeInput - state.brake, -2.8 * dt, brakeRate * dt);
 
         let acceleration = (state.throttle / 100) * 18;
         acceleration -= state.brake * 26;
@@ -2855,6 +3227,38 @@ function coachEndFittings(unit, endZ) {
         document.getElementById("next-detail").textContent = station ? `${Math.max(0, station.km - state.position).toFixed(1).padStart(5, "0")} KM / COUNTY ${station.county.toUpperCase()}` : state.message;
         document.getElementById("telemetry-main").textContent = station ? station.name.toUpperCase() : "DUBLIN CONNOLLY";
         document.getElementById("telemetry-sub").textContent = station ? `${Math.max(0, station.km - state.position).toFixed(1).padStart(5, "0")} km / ${station.county.toUpperCase()}` : state.message;
+        updateCabAlert(station);
+      }
+
+      function updateCabAlert(station) {
+        if (!state.started || state.paused || state.finished || !station) {
+          cabAlert.classList.add("hidden");
+          return;
+        }
+        const distance = station.km - state.position;
+        const brakeNeeded = (state.speed * state.speed) / (52 * 300) * 1.05 + 0.25;
+        let text = "";
+        let tone = "";
+        if (state.dwell > 0) {
+          text = `PERFECT STOP AT ${station.name.toUpperCase()}!`;
+          tone = "good";
+        } else if (distance <= 2.5 && distance > -0.5 && state.speed > 14) {
+          text = `TOO FAST! EMERGENCY BRAKE FOR ${station.name.toUpperCase()}!`;
+          tone = "urgent";
+        } else if (distance < brakeNeeded && state.speed > 14) {
+          text = `BRAKE NOW - ${station.name.toUpperCase()} AHEAD`;
+          tone = "";
+        } else if (distance < 2.5 && state.speed > 0.5 && state.speed <= 14) {
+          text = "CRAWL INTO THE PLATFORM";
+          tone = "good";
+        }
+        if (!text) {
+          cabAlert.classList.add("hidden");
+          return;
+        }
+        cabAlert.textContent = text;
+        cabAlert.classList.remove("hidden", "good", "urgent");
+        if (tone) cabAlert.classList.add(tone);
       }
 
       function getMapPosition(km) {
@@ -2951,17 +3355,39 @@ function coachEndFittings(unit, endZ) {
         event.preventDefault();
         state.zoom = THREE.MathUtils.clamp(state.zoom * (event.deltaY > 0 ? 1.12 : 0.89), 0.45, 2.8);
       }, { passive: false });
-      renderer.domElement.addEventListener("pointerdown", (event) => {
-        if (event.button !== 2) return;
+      const canvas = renderer.domElement;
+      const activePointers = new Map();
+      let pinchBase = null;
+      canvas.addEventListener("pointerdown", (event) => {
         event.preventDefault();
-        orbit.dragging = true;
-        orbit.pointerId = event.pointerId;
-        orbit.lastX = event.clientX;
-        orbit.lastY = event.clientY;
-        renderer.domElement.classList.add("dragging");
-        renderer.domElement.setPointerCapture(event.pointerId);
+        canvas.setPointerCapture(event.pointerId);
+        activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (activePointers.size === 1) {
+          orbit.dragging = true;
+          orbit.pointerId = event.pointerId;
+          orbit.lastX = event.clientX;
+          orbit.lastY = event.clientY;
+          canvas.classList.add("dragging");
+        } else {
+          orbit.dragging = false;
+          const pts = [...activePointers.values()];
+          pinchBase = {
+            dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y),
+            zoom: state.zoom,
+          };
+        }
       });
-      renderer.domElement.addEventListener("pointermove", (event) => {
+      canvas.addEventListener("pointermove", (event) => {
+        const p = activePointers.get(event.pointerId);
+        if (!p) return;
+        p.x = event.clientX;
+        p.y = event.clientY;
+        if (activePointers.size >= 2 && pinchBase) {
+          const pts = [...activePointers.values()];
+          const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+          if (dist > 1) state.zoom = THREE.MathUtils.clamp(pinchBase.zoom * (pinchBase.dist / dist), 0.45, 2.8);
+          return;
+        }
         if (!orbit.dragging || event.pointerId !== orbit.pointerId) return;
         const deltaX = event.clientX - orbit.lastX;
         const deltaY = event.clientY - orbit.lastY;
@@ -2971,17 +3397,32 @@ function coachEndFittings(unit, endZ) {
         orbit.pitch = THREE.MathUtils.clamp(orbit.pitch - deltaY * 0.006, -0.38, 0.62);
       });
       function endOrbit(event) {
-        if (!orbit.dragging || (event && event.pointerId !== orbit.pointerId)) return;
-        if (event && renderer.domElement.hasPointerCapture(event.pointerId)) {
-          renderer.domElement.releasePointerCapture(event.pointerId);
+        activePointers.delete(event.pointerId);
+        if (event.pointerId === orbit.pointerId) orbit.dragging = false;
+        if (activePointers.size === 1) {
+          for (const [id, p] of activePointers) {
+            orbit.dragging = true;
+            orbit.pointerId = id;
+            orbit.lastX = p.x;
+            orbit.lastY = p.y;
+          }
+          pinchBase = null;
+        } else if (activePointers.size === 0) {
+          orbit.dragging = false;
+          orbit.pointerId = null;
+          pinchBase = null;
+          canvas.classList.remove("dragging");
         }
+      }
+      canvas.addEventListener("pointerup", endOrbit);
+      canvas.addEventListener("pointercancel", endOrbit);
+      window.addEventListener("blur", () => {
+        activePointers.clear();
         orbit.dragging = false;
         orbit.pointerId = null;
-        renderer.domElement.classList.remove("dragging");
-      }
-      renderer.domElement.addEventListener("pointerup", endOrbit);
-      renderer.domElement.addEventListener("pointercancel", endOrbit);
-      window.addEventListener("blur", () => endOrbit());
+        pinchBase = null;
+        canvas.classList.remove("dragging");
+      });
 
       action.addEventListener("click", () => {
         if (state.paused) {
@@ -3001,15 +3442,20 @@ function coachEndFittings(unit, endZ) {
         if (!state.started || state.finished) return;
         state.stopHeld = !state.stopHeld;
         stopButton.classList.toggle("engaged", state.stopHeld);
-        stopButton.textContent = state.stopHeld ? "RELEASE BRAKE" : "STOP";
+        stopButton.textContent = state.stopHeld ? "HOLD" : "STOP";
         if (state.stopHeld) {
           state.throttleSetting = 0;
           powerSlider.value = "0";
           powerValue.textContent = "0%";
-          state.message = "Stop toggle engaged. Braking to a stand and holding.";
+          state.message = "Emergency stop engaged. Braking to a stand and holding.";
         } else {
-          state.message = "Stop toggle released. Power is available again.";
+          state.message = "Emergency stop released. Power is available again.";
         }
+      });
+
+      hornButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (state.started && !state.paused && !state.finished) playHorn();
       });
 
       document.querySelectorAll(".view-button").forEach((button) => {
@@ -3018,11 +3464,17 @@ function coachEndFittings(unit, endZ) {
         });
       });
 
-      const powerSlider = document.getElementById("power-slider");
+      const powerSlider = document.getElementById("power-lever");
       const powerValue = document.getElementById("power-value");
+      const brakeLever = document.getElementById("brake-lever");
+      const brakeValue = document.getElementById("brake-value");
       powerSlider.addEventListener("input", () => {
         state.throttleSetting = Number(powerSlider.value);
         powerValue.textContent = `${powerSlider.value}%`;
+      });
+      brakeLever.addEventListener("input", () => {
+        state.brakeLever = Number(brakeLever.value);
+        brakeValue.textContent = `${brakeLever.value}%`;
       });
 
       window.addEventListener("resize", () => {
