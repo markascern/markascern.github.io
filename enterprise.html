@@ -2834,6 +2834,33 @@ function coachEndFittings(unit, endZ) {
           thudData[index] = thudLast * Math.pow(1 - index / thudData.length, 1.6);
         }
         trainAudio.thudBuffer = thudBuffer;
+
+        // Real engine loop - drop an engine.mp3 next to this file and it takes over
+        trainAudio.engineSrc = null;
+        fetch("engine.mp3")
+          .then((response) => {
+            if (!response.ok) throw new Error("engine.mp3 not found");
+            return response.arrayBuffer();
+          })
+          .then((data) => ctx.decodeAudioData(data))
+          .then((buffer) => {
+            if (trainAudio.ctx !== ctx) return;
+            const src = ctx.createBufferSource();
+            src.buffer = buffer;
+            src.loop = true;
+            const filter = ctx.createBiquadFilter();
+            filter.type = "lowpass";
+            filter.frequency.value = 950;
+            const engineGain = ctx.createGain();
+            engineGain.gain.value = 0;
+            src.connect(filter);
+            filter.connect(engineGain);
+            engineGain.connect(master);
+            src.start();
+            trainAudio.engineSrc = src;
+            trainAudio.engineGainNode = engineGain;
+          })
+          .catch(() => {});
       }
 
       function playClack() {
@@ -2841,9 +2868,9 @@ function coachEndFittings(unit, endZ) {
         if (!ctx || !trainAudio.clackBuffer) return;
         const now = ctx.currentTime;
         const worldSpeed = Math.max(6, state.speed / 6);
-        const bogieGap = THREE.MathUtils.clamp(13.2 / worldSpeed, 0.28, 1.1);
+        const gap = THREE.MathUtils.clamp(10 / worldSpeed, 0.3, 0.7);
         const loud = 0.15 + Math.min(0.28, state.speed / 700);
-        for (const pairOffset of [0, bogieGap]) {
+        for (const pairOffset of [0, gap]) {
           for (const offset of [0, 0.12]) {
             const at = now + pairOffset + offset;
             const level = loud * (offset ? 0.78 : 1) * (0.85 + Math.random() * 0.3);
@@ -2896,10 +2923,12 @@ function coachEndFittings(unit, endZ) {
         src.stop(now + 1.2);
       }
 
-      function playHorn() {
+      function startHorn() {
         const ctx = trainAudio.ctx;
-        if (!ctx) return;
+        if (!ctx || trainAudio.hornNodes || !trainAudio.whiteBuffer) return;
         const now = ctx.currentTime;
+        const oscs = [];
+        const gains = [];
         for (const freq of [311, 370]) {
           const parts = [
             ["sawtooth", 1, 1],
@@ -2913,31 +2942,46 @@ function coachEndFittings(unit, endZ) {
             osc.detune.value = Math.random() * 6 - 3;
             const gain = ctx.createGain();
             gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.12 * level, now + 0.06);
-            gain.gain.setValueAtTime(0.12 * level, now + 0.75);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.15);
+            gain.gain.linearRampToValueAtTime(0.12 * level, now + 0.07);
             osc.connect(gain);
             gain.connect(trainAudio.master);
             osc.start(now);
-            osc.stop(now + 1.2);
+            oscs.push(osc);
+            gains.push(gain);
           }
           const breath = ctx.createBufferSource();
           breath.buffer = trainAudio.whiteBuffer;
+          breath.loop = true;
           const breathFilter = ctx.createBiquadFilter();
           breathFilter.type = "bandpass";
           breathFilter.frequency.value = freq * 2;
           breathFilter.Q.value = 1.6;
           const breathGain = ctx.createGain();
           breathGain.gain.setValueAtTime(0, now);
-          breathGain.gain.linearRampToValueAtTime(0.05, now + 0.06);
-          breathGain.gain.setValueAtTime(0.05, now + 0.75);
-          breathGain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+          breathGain.gain.linearRampToValueAtTime(0.045, now + 0.07);
           breath.connect(breathFilter);
           breathFilter.connect(breathGain);
           breathGain.connect(trainAudio.master);
           breath.start(now);
-          breath.stop(now + 1.15);
+          oscs.push(breath);
+          gains.push(breathGain);
         }
+        trainAudio.hornNodes = oscs;
+        trainAudio.hornGains = gains;
+      }
+
+      function stopHorn() {
+        const ctx = trainAudio.ctx;
+        if (!ctx || !trainAudio.hornNodes) return;
+        const now = ctx.currentTime;
+        for (const gain of trainAudio.hornGains) {
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(Math.max(0.001, gain.gain.value), now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        }
+        for (const node of trainAudio.hornNodes) node.stop(now + 0.4);
+        trainAudio.hornNodes = null;
+        trainAudio.hornGains = null;
       }
 
       function curveAmount() {
@@ -2964,13 +3008,19 @@ function coachEndFittings(unit, endZ) {
         trainAudio.windGain.gain.setTargetAtTime(windTarget, t, 0.25);
         trainAudio.windHiGain.gain.setTargetAtTime(Math.pow(speedRatio, 2.5) * 0.05, t, 0.25);
 
-        // Diesel chug: firing rate climbs with throttle, not pitch with speed
+        // Diesel sound: real engine.mp3 loop if present, otherwise the synth chug
         const engineOn = state.started && !state.paused;
-        const motorFreq = 9 + (state.throttle / 100) * 15 + speedRatio * 4;
-        trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.25);
-        trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 1.5, t, 0.25);
-        const motorTarget = engineOn ? 0.028 + (state.throttle / 100) * 0.055 + speedRatio * 0.015 : 0;
-        trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.12);
+        if (trainAudio.engineSrc) {
+          trainAudio.engineSrc.playbackRate.setTargetAtTime(0.8 + (state.throttle / 100) * 0.65 + speedRatio * 0.15, t, 0.15);
+          trainAudio.engineGainNode.gain.setTargetAtTime(engineOn ? 0.12 + (state.throttle / 100) * 0.16 : 0, t, 0.15);
+          trainAudio.motorGain.gain.setTargetAtTime(0, t, 0.2);
+        } else {
+          const motorFreq = 9 + (state.throttle / 100) * 15 + speedRatio * 4;
+          trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.25);
+          trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 1.5, t, 0.25);
+          const motorTarget = engineOn ? 0.028 + (state.throttle / 100) * 0.055 + speedRatio * 0.015 : 0;
+          trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.12);
+        }
 
         const screechTarget = state.brake > 0.25 && state.speed > 25
           ? Math.min(0.22, (state.brake - 0.25) * 0.5 * Math.min(1, state.speed / 130))
@@ -2993,12 +3043,14 @@ function coachEndFittings(unit, endZ) {
           trainAudio.clackTimer -= dt;
           if (trainAudio.clackTimer <= 0) {
             playClack();
-            trainAudio.clackTimer = THREE.MathUtils.clamp(26 / worldSpeed * (0.96 + Math.random() * 0.08), 0.14, 2.6);
+            const gap = THREE.MathUtils.clamp(10 / worldSpeed, 0.3, 0.7);
+            trainAudio.clackTimer = gap * 2 + 0.2 + Math.random() * 0.08;
           }
         }
       }
 
       function reset(started = false) {
+        stopHorn();
         state.started = started;
         state.paused = false;
         state.finished = false;
@@ -3056,7 +3108,6 @@ function coachEndFittings(unit, endZ) {
         const distance = station.km - state.position;
 
         if (Math.abs(distance) <= 1.5 && state.speed <= 14) {
-          state.position = station.km;
           state.speed = 0;
           state.throttle = 0;
           state.brake = 1;
@@ -3300,6 +3351,7 @@ function coachEndFittings(unit, endZ) {
       }
 
       function showPauseOverlay() {
+        stopHorn();
         overlay.classList.remove("hidden");
         overlayTitle.textContent = "PAUSED";
         overlayKicker.textContent = "THE DRIVER'S CAB IS WAITING";
@@ -3309,6 +3361,7 @@ function coachEndFittings(unit, endZ) {
       }
 
       function showFinishOverlay() {
+        stopHorn();
         overlay.classList.remove("hidden");
         overlayTitle.textContent = state.completed ? "JOURNEY COMPLETE" : "SERVICE ENDED";
         overlayKicker.textContent = state.completed ? "DUBLIN CONNOLLY IS ON THE BOARD" : "THE FINAL PLATFORM STOP WAS MISSED";
@@ -3350,12 +3403,13 @@ function coachEndFittings(unit, endZ) {
         } else if (key.toLowerCase() === "x" && state.started && !state.finished) {
           toggleSide();
         } else if (key.toLowerCase() === "h" && state.started && !state.finished) {
-          playHorn();
+          if (!event.repeat) startHorn();
         }
       });
 
       window.addEventListener("keyup", (event) => {
         keys.delete(event.key);
+        if (event.key.toLowerCase() === "h") stopHorn();
       });
 
       renderer.domElement.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -3461,10 +3515,14 @@ function coachEndFittings(unit, endZ) {
         }
       });
 
-      hornButton.addEventListener("click", (event) => {
+      hornButton.addEventListener("pointerdown", (event) => {
         event.stopPropagation();
-        if (state.started && !state.paused && !state.finished) playHorn();
+        event.preventDefault();
+        if (state.started && !state.paused && !state.finished) startHorn();
       });
+      for (const type of ["pointerup", "pointerleave", "pointercancel"]) {
+        hornButton.addEventListener(type, () => stopHorn());
+      }
 
       document.querySelectorAll(".view-button").forEach((button) => {
         button.addEventListener("click", () => {
