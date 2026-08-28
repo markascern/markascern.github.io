@@ -1,34 +1,49 @@
 # Enterprise Express
 
-An Irish train driving game with a 3D WebGL version and a Python/Tkinter fallback. Drive the Enterprise express from Belfast Grand Central to Dublin Connolly, calling at Portadown, Newry, Dundalk, and Drogheda.
+## Play here: https://markascern.github.io/enterprise.html
 
-## 3D version
+Hi! I'm 12 years old and I made this train driving game all about the **Enterprise** — the real express train that Translink and Irish Rail run between **Belfast Grand Central** and **Dublin Connolly**.
 
-Open `irish_train_game_3d.html` in a modern browser. It uses Three.js from a CDN, so an internet connection is needed the first time it loads.
+In the game you get to drive a huge 300 km/h express across the whole route. You stop at real stations: **Portadown, Newry, Dundalk, Drogheda**, and finally **Dublin Connolly**. Watch out for the border crossing between Northern Ireland and the Republic of Ireland!
 
-The 3D version includes Class 9001/9003 Enterprise locomotives at each end with smoothly curved raked noses, the twin windscreen, yellow warning bowtie, red marker lamps and magenta/red swoosh livery, seven Mk3 coaches with the tall tinted window band and Enterprise wordmark, an MK3 generator coach, proper railway bogies with spinning wheelsets, continuous ballast track with dense sleepers and rust-shouldered rails, a 300 km/h powertrain with 150/70/45 approach boards, a large world (50 metres of track per map metre of route), animated river and lake water, a girder bridge, Belfast Grand Central and Dublin Connolly as glazed terminus buildings with stepped gable roof bays and platform canopies, blue Enterprise shelters at the other stations, signals, a chase camera, a cab camera with working gauges, and a departure announcement.
+## How to play
 
-## Run
-
-```text
-python irish_train_game.py
-```
-
-For the 3D game, open `irish_train_game_3d.html` directly. The file `announcement.mp3` should stay beside the HTML file; it plays when the service starts.
+1. Click the link above (or open `enterprise.html` in a browser).
+2. Press **Enter** or click to start driving.
+3. Listen to the departure announcement when you set off!
+4. Stop gently inside every platform zone to score points. Don't crash past the platforms!
 
 ## Controls
 
-- `Up` or `W`: accelerate (to 300 km/h on open line)
-- `Down` or `S`: brake
-- `Space`: emergency brake
-- `P`: pause
-- `R`: restart
+| Key | What it does |
+| --- | --- |
+| `Up` or `W` | Accelerate (up to 300 km/h on the open line!) |
+| `Down` or `S` | Brake |
+| `Space` | Emergency brake |
+| `P` | Pause |
+| `R` | Restart |
+| `V` | Switch between front and cab camera |
+| `F` | See the whole train, front to back |
+| `X` | Switch which side of the train you look at |
+| Right mouse drag | Look around the train |
+| Scroll | Zoom in and out |
 
-3D-only:
+## Stop like a real driver
 
-- `V`: switch between front and cab camera
-- `F`: show the full formation, including both locomotives and the MK3 generator
-- Click `SWITCH SIDE` or press `X`: switch the camera between the left and right side of the train
-- Hold the right mouse button and drag: orbit the camera around the train
+Speed limits drop as you get close to a station:
 
-Speed limits drop to 150 km/h 14 km before each station, 70 km/h 7 km out, and 45 km/h in the final approach. Stop below 14 km/h inside each station's platform zone to score points.
+- **150 km/h** — 14 km before the station
+- **70 km/h** — 7 km before the station
+- **45 km/h** — on the final approach
+
+Brake early and glide into the platform under **14 km/h** to score points. That's what real train drivers have to do!
+
+## Cool stuff in the game
+
+- Real-looking Class 9001 Enterprise locomotives with curved noses and the yellow warning front
+- Seven Mk3 coaches plus a generator coach
+- Spinning wheels, signals, bridges, rivers, and lakes
+- A map of the Island of Ireland with the border crossing
+- A departure announcement that plays when you start
+
+If you download the game files, keep `announcement.mp3` next to `enterprise.html` so the departure announcement can play.
