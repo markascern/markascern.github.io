@@ -2795,11 +2795,11 @@ function coachEndFittings(unit, endZ) {
 
         if (state.introHold) {
           desired = point.clone()
-            .add(frame.tangent.clone().multiplyScalar(34))
-            .add(frame.normal.clone().multiplyScalar(-22 * state.cameraSide));
-          desired.y = 4.2;
-          target = point.clone();
-          target.y = 2.4;
+            .add(frame.tangent.clone().multiplyScalar(-26))
+            .add(frame.normal.clone().multiplyScalar(-26 * state.cameraSide));
+          desired.y = 4.6;
+          target = point.clone().add(frame.tangent.clone().multiplyScalar(45));
+          target.y = 2.2;
         } else if (state.cameraMode === "side") {
           const offset = frame.normal.clone()
             .multiplyScalar(52 * zoom * state.cameraSide)
