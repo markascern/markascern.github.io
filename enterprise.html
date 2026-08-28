@@ -2789,15 +2789,15 @@ function coachEndFittings(unit, endZ) {
         let desired;
         let target;
 
-        if (state.introHold && (state.position > 2.2 || state.cameraMode !== "front" || orbit.dragging || zoom !== 1)) {
+        if (state.introHold && (state.position > 3 || state.cameraMode !== "front" || orbit.dragging || zoom !== 1)) {
           state.introHold = false;
         }
 
         if (state.introHold) {
           desired = point.clone()
-            .add(frame.tangent.clone().multiplyScalar(46))
-            .add(frame.normal.clone().multiplyScalar(27 * state.cameraSide));
-          desired.y = 4.4;
+            .add(frame.tangent.clone().multiplyScalar(34))
+            .add(frame.normal.clone().multiplyScalar(-22 * state.cameraSide));
+          desired.y = 4.2;
           target = point.clone();
           target.y = 2.4;
         } else if (state.cameraMode === "side") {
