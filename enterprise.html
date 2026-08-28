@@ -2789,7 +2789,7 @@ function coachEndFittings(unit, endZ) {
         let desired;
         let target;
 
-        if (state.introHold && (state.speed > 1 || state.cameraMode !== "front" || orbit.dragging || zoom !== 1)) {
+        if (state.introHold && (state.position > 2.2 || state.cameraMode !== "front" || orbit.dragging || zoom !== 1)) {
           state.introHold = false;
         }
 
