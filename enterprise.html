@@ -2746,16 +2746,16 @@ function coachEndFittings(unit, endZ) {
         windHi.start();
         trainAudio.windHiGain = windHiGain;
 
-        // Traction motor whine - pitch climbs with speed
+        // Diesel engine growl - slow chug that speeds up with the throttle
         const motorOsc = ctx.createOscillator();
         motorOsc.type = "sawtooth";
-        motorOsc.frequency.value = 40;
+        motorOsc.frequency.value = 9;
         const motorOsc2 = ctx.createOscillator();
-        motorOsc2.type = "sine";
-        motorOsc2.frequency.value = 81;
+        motorOsc2.type = "sawtooth";
+        motorOsc2.frequency.value = 13.5;
         const motorFilter = ctx.createBiquadFilter();
         motorFilter.type = "lowpass";
-        motorFilter.frequency.value = 850;
+        motorFilter.frequency.value = 220;
         const motorGain = ctx.createGain();
         motorGain.gain.value = 0;
         motorOsc.connect(motorFilter);
@@ -2840,32 +2840,38 @@ function coachEndFittings(unit, endZ) {
         const ctx = trainAudio.ctx;
         if (!ctx || !trainAudio.clackBuffer) return;
         const now = ctx.currentTime;
-        const loud = 0.07 + Math.min(0.3, state.speed / 800);
-        for (const offset of [0, 0.1 + Math.random() * 0.02]) {
-          const src = ctx.createBufferSource();
-          src.buffer = trainAudio.clackBuffer;
-          const filter = ctx.createBiquadFilter();
-          filter.type = "bandpass";
-          filter.frequency.value = 750 + Math.random() * 900;
-          filter.Q.value = 1.2;
-          const gain = ctx.createGain();
-          gain.gain.value = loud * (0.7 + Math.random() * 0.5);
-          src.connect(filter);
-          filter.connect(gain);
-          gain.connect(trainAudio.master);
-          src.start(now + offset);
+        const worldSpeed = Math.max(6, state.speed / 6);
+        const bogieGap = THREE.MathUtils.clamp(13.2 / worldSpeed, 0.28, 1.1);
+        const loud = 0.15 + Math.min(0.28, state.speed / 700);
+        for (const pairOffset of [0, bogieGap]) {
+          for (const offset of [0, 0.12]) {
+            const at = now + pairOffset + offset;
+            const level = loud * (offset ? 0.78 : 1) * (0.85 + Math.random() * 0.3);
+            const src = ctx.createBufferSource();
+            src.buffer = trainAudio.clackBuffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = "bandpass";
+            filter.frequency.value = 1250 + Math.random() * 500;
+            filter.Q.value = 1.1;
+            const gain = ctx.createGain();
+            gain.gain.value = level;
+            src.connect(filter);
+            filter.connect(gain);
+            gain.connect(trainAudio.master);
+            src.start(at);
 
-          const thud = ctx.createBufferSource();
-          thud.buffer = trainAudio.thudBuffer;
-          const thudFilter = ctx.createBiquadFilter();
-          thudFilter.type = "lowpass";
-          thudFilter.frequency.value = 210;
-          const thudGain = ctx.createGain();
-          thudGain.gain.value = loud * 1.1;
-          thud.connect(thudFilter);
-          thudFilter.connect(thudGain);
-          thudGain.connect(trainAudio.master);
-          thud.start(now + offset);
+            const thud = ctx.createBufferSource();
+            thud.buffer = trainAudio.thudBuffer;
+            const thudFilter = ctx.createBiquadFilter();
+            thudFilter.type = "lowpass";
+            thudFilter.frequency.value = 300;
+            const thudGain = ctx.createGain();
+            thudGain.gain.value = level * 1.25;
+            thud.connect(thudFilter);
+            thudFilter.connect(thudGain);
+            thudGain.connect(trainAudio.master);
+            thud.start(at);
+          }
         }
       }
 
@@ -2946,23 +2952,25 @@ function coachEndFittings(unit, endZ) {
         const speedRatio = state.speed / VMAX;
         const moving = state.started && !state.paused && state.speed > 0.5;
 
-        const rumbleTarget = moving ? 0.1 + speedRatio * 0.42 : 0;
+        const rumbleTarget = moving ? 0.14 + speedRatio * 0.5 : 0;
         trainAudio.rumbleGain.gain.setTargetAtTime(rumbleTarget, t, 0.15);
         trainAudio.rumbleFilter.frequency.setTargetAtTime(70 + speedRatio * 170, t, 0.25);
 
-        const rollingTarget = moving ? 0.05 + speedRatio * 0.18 : 0;
+        const rollingTarget = moving ? 0.04 + speedRatio * 0.1 : 0;
         trainAudio.rollingGain.gain.setTargetAtTime(rollingTarget, t, 0.15);
-        trainAudio.rollingFilter.frequency.setTargetAtTime(260 + speedRatio * 520, t, 0.2);
+        trainAudio.rollingFilter.frequency.setTargetAtTime(220 + speedRatio * 280, t, 0.2);
 
-        const windTarget = speedRatio * speedRatio * 0.3;
+        const windTarget = speedRatio * speedRatio * 0.09;
         trainAudio.windGain.gain.setTargetAtTime(windTarget, t, 0.25);
-        trainAudio.windHiGain.gain.setTargetAtTime(Math.pow(speedRatio, 2.5) * 0.2, t, 0.25);
+        trainAudio.windHiGain.gain.setTargetAtTime(Math.pow(speedRatio, 2.5) * 0.05, t, 0.25);
 
-        const motorFreq = 38 + speedRatio * 130 + (state.throttle / 100) * 22;
-        trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.08);
-        trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 2.02, t, 0.08);
-        const motorTarget = moving ? Math.min(0.15, (state.throttle / 100) * 0.09 + speedRatio * 0.09) : 0;
-        trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.1);
+        // Diesel chug: firing rate climbs with throttle, not pitch with speed
+        const engineOn = state.started && !state.paused;
+        const motorFreq = 9 + (state.throttle / 100) * 15 + speedRatio * 4;
+        trainAudio.motorOsc.frequency.setTargetAtTime(motorFreq, t, 0.25);
+        trainAudio.motorOsc2.frequency.setTargetAtTime(motorFreq * 1.5, t, 0.25);
+        const motorTarget = engineOn ? 0.028 + (state.throttle / 100) * 0.055 + speedRatio * 0.015 : 0;
+        trainAudio.motorGain.gain.setTargetAtTime(motorTarget, t, 0.12);
 
         const screechTarget = state.brake > 0.25 && state.speed > 25
           ? Math.min(0.22, (state.brake - 0.25) * 0.5 * Math.min(1, state.speed / 130))
@@ -2985,7 +2993,7 @@ function coachEndFittings(unit, endZ) {
           trainAudio.clackTimer -= dt;
           if (trainAudio.clackTimer <= 0) {
             playClack();
-            trainAudio.clackTimer = THREE.MathUtils.clamp(26 / worldSpeed * (0.92 + Math.random() * 0.16), 0.14, 2.6);
+            trainAudio.clackTimer = THREE.MathUtils.clamp(26 / worldSpeed * (0.96 + Math.random() * 0.08), 0.14, 2.6);
           }
         }
       }
